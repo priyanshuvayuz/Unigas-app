@@ -2,12 +2,13 @@ import React, { useContext } from 'react'
 import { Text, View, StyleSheet } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { dashboardContext } from './DashboardContext';
+import Spinner from '../../components/Spinner';
 
 
 
 
 const CardComp = () => {
-  const { role, executive, id, distributor, customer, order } = useContext(dashboardContext);
+  const { role, executive, id, distributor, customer, order, loader } = useContext(dashboardContext);
 
 
   const filters = (filterName) => {
@@ -34,6 +35,16 @@ const CardComp = () => {
 
   var filterCustomer = [];
   filterCustomer = filters(customer);
+
+  var filterOrder = [];
+  filterOrder = filters(order)
+
+
+  if (loader) {
+    return <View style={{ paddingVertical: '60%', backgroundColor: 'whitesmoke' }}>
+      <Spinner />
+    </View>
+  }
 
 
   const cardFunc = (name, number, color) => {
@@ -69,7 +80,7 @@ const CardComp = () => {
       ? cardFunc('Total Distributor', filterDistributor, 'lightgreen') : null}
     {role === 'manager' || role === 'distributor' || role === 'executive'
       ? cardFunc('Total Customer', filterCustomer, 'tomato') : null}
-    {cardFunc('Approved Orders', order, '#FFFF00')}
+    {cardFunc('Approved Orders', filterOrder, '#FFFF00')}
   </View>
 }
 
@@ -95,12 +106,11 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   mainTxt: {
+    display: 'flex',
     fontSize: 20,
     fontWeight: '700',
-    width: '100%',
   },
   cardTxt: {
-    width: '58%',
     position: 'absolute',
     top: 20,
     left: 15,

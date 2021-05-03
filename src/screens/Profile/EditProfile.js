@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StatusBar, Text, View, StyleSheet, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { StatusBar, Text, View, StyleSheet, TextInput, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import Header1 from '../../components/Header1';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Avatar } from 'react-native-paper';
@@ -14,11 +14,12 @@ const EditProfile = ({ navigation }) => {
   const [data, setData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    gstin: '', pan: '',
   });
   const [btnTxt, setBtnTxt] = useState('Save');
   const [Id, setID] = useState('');
-  const { name, email, phone } = data;
+  const { name, email, phone, gstin, pan } = data;
   const [loader, setLoader] = useState(true);
   const [role, setRole] = useState('');
   const [pic, setPic] = useState('');
@@ -39,8 +40,8 @@ const EditProfile = ({ navigation }) => {
         method: 'GET',
       }).then((el) => {
         if (role === 'distributor') {
-          const { name, email, contact1 } = el.data.result;
-          setData({ name, email, phone: `${contact1}` });
+          const { name, email, contact1, gstin, pan } = el.data.result;
+          setData({ name, email, phone: `${contact1}`, pan, gstin });
           setLoader(false);
         } else if (role === 'manager' || role === 'executive') {
           const { name, email_id, contact_no } = el.data.result;
@@ -50,20 +51,17 @@ const EditProfile = ({ navigation }) => {
       }).catch(err => console.log(err.response));
     }
   };
-
-  const getDataFromStorage = () => {
-    setLoader(true);
-    AsyncStorage.getItem('role').then((el) => {
-      setRole(el);
-    });
-    AsyncStorage.getItem('profile').then((el) => {
-      setPic(`https://unigas-backend-dev.herokuapp.com/users/get_image?id=${Id}`);
-      setID(el);
-      getData();
-    });
-  }
   useEffect(() => {
-    getDataFromStorage();
+    if (!email) {
+      AsyncStorage.getItem('role').then((el) => {
+        setRole(el);
+      });
+      AsyncStorage.getItem('profile').then((el) => {
+        setPic(`https://unigas-backend-dev.herokuapp.com/users/get_image?id=${Id}`);
+        setID(el);
+        getData();
+      });
+    }
   });
 
 
@@ -77,8 +75,12 @@ const EditProfile = ({ navigation }) => {
     const formData = new FormData();
     formData.append('id', Id);
     formData.append('name', name);
-    formData.append('contact_no', phone);
+    formData.append('contact_no', `${phone}`);
+    formData.append('contact1', `${phone}`);
+    formData.append('email', email);
     formData.append('email_id', email);
+    formData.append('gstin', gstin);
+    formData.append('pan', pan);
     formData.append('profile', { uri: pic, name: 'photo1.png', filename: 'imageName1.png', type: 'image/png' });
     fetch(`https://unigas-backend-dev.herokuapp.com/auth/update_manager`, {
       method: 'put',
@@ -89,6 +91,7 @@ const EditProfile = ({ navigation }) => {
         navigation.navigate('Profile');
       }, 2000);
     }).catch((err) => {
+      console.log(err.response);
       btntextChnage('Try Again!!!');
     });
   }
@@ -106,16 +109,17 @@ const EditProfile = ({ navigation }) => {
   }
 
 
+  const CameraIcon = <Icons onPress={() => handlePhoto()} size={20} style={styles.Iconedit} name='camera-plus' />
+
 
   if (loader) {
     return <Spinner />
   }
 
-  return <>
+  return <ScrollView>
     <StatusBar backgroundColor="#2e3092" barStyle="light-content" />
     <View style={{ flex: 1, backgroundColor: '#f7f7f7', paddingBottom: 50 }}>
-      <Header1 title="Edit Profile" />
-      <Icons onPress={() => handlePhoto()} style={styles.Iconedit} size={35} name='camera-plus' />
+      <Header1 title="Edit Profile" secondIcon={CameraIcon} />
       <View style={styles.image}>
         <Avatar.Image size={150}
           source={{
@@ -124,10 +128,23 @@ const EditProfile = ({ navigation }) => {
         />
       </View>
       <View style={styles.inputField}>
+
+        {
+          role && role === 'distributor' ?
+            <>
+              <Text style={styles.label}>Gstin</Text>
+              <TextInput style={styles.input} placeholder="Enter Gstin"
+                value={gstin} onChangeText={(e) => setData({ ...data, gstin: e })} />
+
+              <Text style={styles.label}>Pan</Text>
+              <TextInput style={styles.input} placeholder="Enter Pan"
+                value={pan} onChangeText={(e) => setData({ ...data, pan: e })} />
+            </>
+            : null
+        }
         <Text style={styles.label}>Name</Text>
         <TextInput style={styles.input} placeholder="Enter Name"
-          value={name} onChangeText={(e) => setData({ ...data, name: e })}
-        />
+          value={name} onChangeText={(e) => setData({ ...data, name: e })} />
 
         <Text style={styles.label}>Email</Text>
         <TextInput style={styles.input} placeholder="Enter Email"
@@ -138,16 +155,14 @@ const EditProfile = ({ navigation }) => {
           value={phone} onChangeText={(e) => setData({ ...data, phone: e })} />
       </View>
 
-      <TouchableOpacity onPress={() => role === 'distributor' || role === 'executive'
-        ? alert('Distributor and Executive will be done shortly')
-        : handleSave()}
+      <TouchableOpacity style={{ marginBottom: 20 }} onPress={() => handleSave()}
       >
         <View style={styles.button}>
           <Text style={[styles.textSign, { color: "#fff" }]}>{btnTxt}</Text>
         </View>
       </TouchableOpacity>
     </View>
-  </>
+  </ScrollView>
 };
 
 
@@ -162,11 +177,10 @@ const styles = StyleSheet.create({
     paddingVertical: 80
   },
   Iconedit: {
-    color: 'black',
     position: 'absolute',
-    top: '35%',
-    left: '55%',
-    zIndex: 1,
+    right: 20,
+    marginTop: 26,
+    color: 'white',
   },
   inputField: {
     display: 'flex',

@@ -13,6 +13,7 @@ const DashboardContext = ({ children }) => {
   const [order, setOrder] = useState([]);
   const [id, setId] = useState();
   const [role, setRole] = useState('');
+  const [loader, setLoader] = useState(true);
 
 
   const getAllData = () => {
@@ -20,6 +21,7 @@ const DashboardContext = ({ children }) => {
     AsyncStorage.getItem('role').then((el) => setRole(el));
     getAllexecutive().then((el) => {
       if (el.data.result) {
+        setLoader(false);
         setExecutive(el.data.result);
       }
     });
@@ -49,7 +51,7 @@ const DashboardContext = ({ children }) => {
 
 
   return <dashboardContext.Provider value={{
-    executive, distributor, customer, order, id, role
+    executive, distributor, customer, order, id, role, loader, setLoader
   }}>
     {children}
   </dashboardContext.Provider>

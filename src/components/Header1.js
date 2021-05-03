@@ -2,11 +2,13 @@ import React from 'react'
 import { View, Text, StyleSheet, Animated } from 'react-native'
 import Icons from 'react-native-vector-icons/SimpleLineIcons'
 import {withNavigation} from 'react-navigation'
-const Header1 = ({navigation,title, bar}) => {
+const Header1 = ({navigation,title, bar, secondIcon}) => {
    
     return (
         <View style={styles.container}>
             <Icons name='menu' size={20} style={styles.menu}  onPress={()=>navigation.openDrawer()}  /> 
+            {secondIcon
+                ? secondIcon : null}
             {!bar? <Text style={{fontSize:18,fontWeight:'bold', alignSelf:'flex-start',color:'white',left:60,marginTop:23}}>{title}</Text> : null}
     </View>
     )

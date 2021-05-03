@@ -10,7 +10,7 @@ import Icon from 'react-native-vector-icons/SimpleLineIcons'
 
 
 const HomeScreen = ({ navigation }) => {
-    const BellIcon = <Icon name='bell' size={20} style={styles.bell} onPress={() => navigation.navigate('Notify')} />;
+    const BellIcon = <Icon name="bell" size={20} style={styles.bell} onPress={() => navigation.navigate('Notify')} />;
     return (
         <>
             <ScrollView>

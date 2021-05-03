@@ -3,5 +3,8 @@ module.exports = {
   extends: '@react-native-community',
   rules: {
     'prettier/prettier': 0,
+    'semi': 0,
+    'comma-dangle': 0,
+    'react-native/no-inline-styles': 0
   },
 };
